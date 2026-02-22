@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Esther AI – Manchester Guide</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: radial-gradient(circle at top, #2a1b4d, #0e061a);
+  color: white;
+  overflow-x: hidden;
+}
+
+canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+
+#chatContainer {
+  width: 60%;
+  margin: 80px auto;
+  text-align: center;
+  position: relative;
+}
+
+h1 {
+  color: gold;
+  letter-spacing: 2px;
+}
+
+#chatBox {
+  margin-top: 30px;
+  min-height: 250px;
+  text-align: left;
+  background: rgba(255,255,255,0.07);
+  padding: 20px;
+  border-radius: 15px;
+  overflow-y: auto;
+  backdrop-filter: blur(6px);
+}
+
+.message {
+  margin: 12px 0;
+}
+
+.user { color: #7cf0ff; }
+.bot { color: #ffd700; }
+
+input, select {
+  padding: 12px;
+  width: 60%;
+  border-radius: 20px;
+  border: none;
+  margin-top: 20px;
+}
+
+button {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: none;
+  background: gold;
+  cursor: pointer;
+  margin: 6px 4px;
+  font-size: 14px;
+}
+
+button:hover {
+  background: #ffda44;
+}
+
+#map {
+  margin-top: 40px;
+  width: 100%;
+  height: 350px;
+  border: none;
+  border-radius: 15px;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="stars"></canvas>
+
+<div id="chatContainer">
+
+  <h1>⭐ ESTHER</h1>
+  <p>Your Manchester AI Guide</p>
+
+  <select id="languageSelect">
+    <option value="English">English</option>
+    <option value="French">Français</option>
+    <option value="German">Deutsch</option>
+    <option value="Hindi">हिन्दी</option>
+    <option value="Spanish">Español</option>
+    <option value="Chinese">中文</option>
+  </select>
+
+  <div id="chatBox"></div>
+
+  <input type="text" id="userInput" placeholder="Ask Esther about Manchester..." />
+  <button onclick="sendMessage()">Ask</button>
+  <button onclick="startSocietyMatch()">🔎 Find Your Society</button>
+
+  <div id="transportOptions"></div>
+
+  <iframe 
+    id="map"
+    src="https://www.google.com/maps?q=Manchester&output=embed">
+  </iframe>
+
+</div>
+
+<script>
+
+/* ⭐ STAR + CONSTELLATION BACKGROUND */
+
+const canvas = document.getElementById("stars");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let stars = [];
+
+for (let i = 0; i < 120; i++) {
+  stars.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    vx: (Math.random() - 0.5) * 0.3,
+    vy: (Math.random() - 0.5) * 0.3
+  });
+}
+
+function animateStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  stars.forEach(star => {
+    star.x += star.vx;
+    star.y += star.vy;
+
+    if (star.x < 0 || star.x > canvas.width) star.vx *= -1;
+    if (star.y < 0 || star.y > canvas.height) star.vy *= -1;
+
+    ctx.beginPath();
+    ctx.arc(star.x, star.y, 2, 0, Math.PI * 2);
+    ctx.fillStyle = "white";
+    ctx.fill();
+  });
+
+  // Constellation lines
+  for (let i = 0; i < stars.length; i++) {
+    for (let j = i + 1; j < stars.length; j++) {
+      let dx = stars[i].x - stars[j].x;
+      let dy = stars[i].y - stars[j].y;
+      let distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance < 120) {
+        ctx.beginPath();
+        ctx.moveTo(stars[i].x, stars[i].y);
+        ctx.lineTo(stars[j].x, stars[j].y);
+        ctx.strokeStyle = "rgba(255,255,255,0.08)";
+        ctx.stroke();
+      }
+    }
+  }
+
+  requestAnimationFrame(animateStars);
+}
+
+animateStars();
+
+/* 💬 CHAT LOGIC */
+
+async function sendMessage(option = null) {
+
+  const input = document.getElementById("userInput");
+  const language = document.getElementById("languageSelect").value;
+  const chatBox = document.getElementById("chatBox");
+  const transportDiv = document.getElementById("transportOptions");
+
+  let message = option || input.value;
+  if (!message) return;
+
+  chatBox.innerHTML += `<div class="message user">You: ${message}</div>`;
+  input.value = "";
+  transportDiv.innerHTML = "";
+
+  const response = await fetch("http://localhost:3000/ask", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message, language })
+  });
+
+  const data = await response.json();
+  const reply = data.reply;
+
+  chatBox.innerHTML += `<div class="message bot">Esther: ${reply}</div>`;
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  if (reply.toLowerCase().includes("walking") ||
+      reply.toLowerCase().includes("bus") ||
+      reply.toLowerCase().includes("tram")) {
+
+    transportDiv.innerHTML = `
+      <button onclick="sendMessage('Walking')">🚶 Walking</button>
+      <button onclick="sendMessage('Bus')">🚌 Bus</button>
+      <button onclick="sendMessage('Tram')">🚋 Tram</button>
+      <button onclick="sendMessage('Uber')">🚗 Uber</button>
+    `;
+  }
+
+  const map = document.getElementById("map");
+  map.src = "https://www.google.com/maps?q=" + encodeURIComponent(message + " Manchester") + "&output=embed";
+}
+
+function startSocietyMatch() {
+
+  const chatBox = document.getElementById("chatBox");
+
+  chatBox.innerHTML += `
+    <div class="message bot">
+    Esther: Let’s find your perfect society ✨<br><br>
+    What best describes you?<br>
+    <button onclick="sendMessage('I am social and outgoing')">Social</button>
+    <button onclick="sendMessage('I am creative')">Creative</button>
+    <button onclick="sendMessage('I am academic')">Academic</button>
+    <button onclick="sendMessage('I am sporty')">Sporty</button>
+    <button onclick="sendMessage('I am cultural or faith-oriented')">Cultural/Faith</button>
+    </div>
+  `;
+
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+</script>
+
+</body>
+</html>
