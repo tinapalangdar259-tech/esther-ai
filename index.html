@@ -190,7 +190,8 @@ async function sendMessage(option = null) {
   input.value = "";
   transportDiv.innerHTML = "";
 
-  const response = await fetch("http://localhost:3000/ask", {
+  const response = await fetch("https://esther-ai-1.onrender.com/", 
+  {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ message, language })
