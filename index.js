@@ -61,7 +61,7 @@ Rules:
 ];
 
 /* 🔒 Demo limit */
-const MAX_REQUESTS = 5;
+const MAX_REQUESTS = 1500;
 let requestCount = 0;
 
 /* ✅ MAIN CHAT ROUTE (NOW MATCHES FRONTEND) */
