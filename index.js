@@ -7,13 +7,7 @@ dotenv.config();
 
 const app = express();
 
-/* ✅ CORS — allow GitHub Pages */
-app.use(cors({
-  origin: "https://tinapalangdar259-tech.github.io",
-  methods: ["GET", "POST"],
-  allowedHeaders: ["Content-Type"]
-}));
-
+app.use (cors());
 app.use(express.json());
 
 /* ✅ OpenAI setup */
