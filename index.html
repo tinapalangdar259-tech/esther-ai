@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+BABE INSERT THE CHANGES SO THAT I CAN JUST PAST NOT DO ANYTHING MYSELF ITS WE HAVE LESS THAN 2 HRS<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
@@ -117,7 +117,7 @@ button:hover {
 
 <script>
 
-/* ⭐ STAR + CONSTELLATION BACKGROUND */
+/* ⭐ STAR BACKGROUND */
 
 const canvas = document.getElementById("stars");
 const ctx = canvas.getContext("2d");
@@ -152,7 +152,6 @@ function animateStars() {
     ctx.fill();
   });
 
-  // Constellation lines
   for (let i = 0; i < stars.length; i++) {
     for (let j = i + 1; j < stars.length; j++) {
       let dx = stars[i].x - stars[j].x;
@@ -176,6 +175,8 @@ animateStars();
 
 /* 💬 CHAT LOGIC */
 
+const BACKEND_URL = "https://esther-ai-1.onrender.com/chat";
+
 async function sendMessage(option = null) {
 
   const input = document.getElementById("userInput");
@@ -183,41 +184,63 @@ async function sendMessage(option = null) {
   const chatBox = document.getElementById("chatBox");
   const transportDiv = document.getElementById("transportOptions");
 
-  let message = option || input.value;
+  let message = option || input.value.trim();
   if (!message) return;
 
   chatBox.innerHTML += `<div class="message user">You: ${message}</div>`;
   input.value = "";
   transportDiv.innerHTML = "";
 
-const response = await fetch("https://esther-ai-1.onrender.com/chat", {
-    method: "POST",
-    headers: {
+  try {
+
+    const response = await fetch(BACKEND_URL, {
+      method: "POST",
+      headers: {
         "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ message, language })
-});  
+      },
+      body: JSON.stringify({ message, language })
+    });
 
-const data = await response.json();
-const reply = data.reply;
+    if (!response.ok) {
+      throw new Error("Server returned " + response.status);
+    }
 
-  chatBox.innerHTML += `<div class="message bot">Esther: ${reply}</div>`;
-  chatBox.scrollTop = chatBox.scrollHeight;
+    const data = await response.json();
 
-  if (reply.toLowerCase().includes("walking") ||
-      reply.toLowerCase().includes("bus") ||
-      reply.toLowerCase().includes("tram")) {
+    const reply = data.reply || "⚠️ No reply received.";
 
-    transportDiv.innerHTML = `
-      <button onclick="sendMessage('Walking')">🚶 Walking</button>
-      <button onclick="sendMessage('Bus')">🚌 Bus</button>
-      <button onclick="sendMessage('Tram')">🚋 Tram</button>
-      <button onclick="sendMessage('Uber')">🚗 Uber</button>
+    chatBox.innerHTML += `<div class="message bot">Esther: ${reply}</div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    if (reply.toLowerCase().includes("walking") ||
+        reply.toLowerCase().includes("bus") ||
+        reply.toLowerCase().includes("tram")) {
+
+      transportDiv.innerHTML = `
+        <button onclick="sendMessage('Walking')">🚶 Walking</button>
+        <button onclick="sendMessage('Bus')">🚌 Bus</button>
+        <button onclick="sendMessage('Tram')">🚋 Tram</button>
+        <button onclick="sendMessage('Uber')">🚗 Uber</button>
+      `;
+    }
+
+    const map = document.getElementById("map");
+    map.src = "https://www.google.com/maps?q=" 
+      + encodeURIComponent(message + " Manchester") 
+      + "&output=embed";
+
+  } catch (error) {
+
+    console.error("Error:", error);
+
+    chatBox.innerHTML += `
+      <div class="message bot">
+        ⚠️ Connection error. Check backend logs.
+      </div>
     `;
-  }
 
-  const map = document.getElementById("map");
-  map.src = "https://www.google.com/maps?q=" + encodeURIComponent(message + " Manchester") + "&output=embed";
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
 }
 
 function startSocietyMatch() {
@@ -226,13 +249,13 @@ function startSocietyMatch() {
 
   chatBox.innerHTML += `
     <div class="message bot">
-    Esther: Let’s find your perfect society ✨<br><br>
-    What best describes you?<br>
-    <button onclick="sendMessage('I am social and outgoing')">Social</button>
-    <button onclick="sendMessage('I am creative')">Creative</button>
-    <button onclick="sendMessage('I am academic')">Academic</button>
-    <button onclick="sendMessage('I am sporty')">Sporty</button>
-    <button onclick="sendMessage('I am cultural or faith-oriented')">Cultural/Faith</button>
+      Esther: Let’s find your perfect society ✨<br><br>
+      What best describes you?<br>
+      <button onclick="sendMessage('I am social and outgoing')">Social</button>
+      <button onclick="sendMessage('I am creative')">Creative</button>
+      <button onclick="sendMessage('I am academic')">Academic</button>
+      <button onclick="sendMessage('I am sporty')">Sporty</button>
+      <button onclick="sendMessage('I am cultural or faith-oriented')">Cultural/Faith</button>
     </div>
   `;
 
@@ -240,6 +263,3 @@ function startSocietyMatch() {
 }
 
 </script>
-
-</body>
-</html>
