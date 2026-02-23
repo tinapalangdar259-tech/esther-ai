@@ -193,7 +193,8 @@ async function sendMessage(option = null) {
 
   try {
 
-    const response = await fetch(BACKEND_URL, {
+    const response = await fetch(BACKEND_URL, 
+    {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
