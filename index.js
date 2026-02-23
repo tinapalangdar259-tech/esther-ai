@@ -65,7 +65,7 @@ const MAX_REQUESTS = 5;
 let requestCount = 0;
 
 /* ✅ MAIN CHAT ROUTE (NOW MATCHES FRONTEND) */
-app.post("/chat", async (req, res) => {
+app.post("/ask", async (req, res) => {
   try {
 
     console.log("Incoming request:", req.body);
