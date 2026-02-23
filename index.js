@@ -9,7 +9,7 @@ const app = express();
 
 /* ✅ CORS — allow GitHub Pages */
 app.use(cors({
-  origin: "*", // you can lock this to your GitHub URL later
+  origin: "https://tinapalangdar259.tech.github.io",
   methods: ["GET", "POST"],
   allowedHeaders: ["Content-Type"]
 }));
